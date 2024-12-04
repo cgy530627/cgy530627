@@ -1,0 +1,6 @@
+- 👋 Hi, I’m shanyun-weixing(闪云-微星) @cgy530627
+- 👀 I’m interested in Python
+- 🌱 I’m currently learning coding
+- 💞️ I’m looking to collaborate on interesting job in the field of IT
+- 📫 How to reach me ?(闪云-微星 on the CSDN)
+- 😄 Pronouns: an outgoing and enthusiastic boy
