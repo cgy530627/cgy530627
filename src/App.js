@@ -5,7 +5,7 @@ import { useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 // 第一人称控制组件（鼠标拖拽旋转 + 键盘移动 + 滚轮缩放）
-function FirstPersonControls({ speed = 0.2, zoomSpeed = 0.5 }) {
+function FirstPersonControls({ speed = 0.2, zoomSpeed = 2.5 }) {
   const { camera, gl } = useThree();
   const moveState = useRef({ forward: false, backward: false, left: false, right: false });
   const pitch = useRef(0); // 上下旋转角度
@@ -13,9 +13,8 @@ function FirstPersonControls({ speed = 0.2, zoomSpeed = 0.5 }) {
   const isDragging = useRef(false);
   const lastMouse = useRef({ x: 0, y: 0 });
 
-  // 初始化相机角度（可选）
+  // 初始化相机角度
   useEffect(() => {
-    // 设置初始方向（例如看向正前方）
     yaw.current = 0;
     pitch.current = 0;
     camera.rotation.set(0, 0, 0);
@@ -49,7 +48,7 @@ function FirstPersonControls({ speed = 0.2, zoomSpeed = 0.5 }) {
     };
   }, []);
 
-  // 鼠标事件：左键拖拽旋转
+  // 鼠标事件：左键拖拽旋转，滚轮缩放
   useEffect(() => {
     const canvas = gl.domElement;
 
@@ -65,11 +64,10 @@ function FirstPersonControls({ speed = 0.2, zoomSpeed = 0.5 }) {
       if (!isDragging.current) return;
       const dx = e.clientX - lastMouse.current.x;
       const dy = e.clientY - lastMouse.current.y;
-      // 灵敏度系数
       const sensitivity = 0.005;
       yaw.current -= dx * sensitivity;
       pitch.current -= dy * sensitivity;
-      // 限制俯仰角在 -PI/2 到 PI/2 之间，防止翻转
+      // 限制俯仰角，防止翻转
       pitch.current = Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, pitch.current));
       
       // 应用旋转：欧拉角顺序 YXZ（偏航、俯仰、滚转）
@@ -83,9 +81,10 @@ function FirstPersonControls({ speed = 0.2, zoomSpeed = 0.5 }) {
       canvas.style.cursor = 'default';
     };
 
-    // 滚轮缩放
+    // 滚轮缩放（修改方向：向下滚动为缩小，向上滚动为放大）
     const handleWheel = (e) => {
-      const delta = Math.sign(e.deltaY) * -zoomSpeed; // 向下滚动缩小（向内移动）
+      // 注意：去掉了负号，使方向与Blender一致
+      const delta = Math.sign(e.deltaY) * zoomSpeed;
       const direction = new THREE.Vector3(0, 0, 1).applyQuaternion(camera.quaternion);
       camera.position.addScaledVector(direction, delta);
     };
@@ -130,19 +129,22 @@ function FirstPersonControls({ speed = 0.2, zoomSpeed = 0.5 }) {
 
 // 加载模型并处理信息牌的组件
 function CampusModel() {
-  const { scene } = useGLTF('/models/your-campus.glb'); // 请替换为你的模型路径
+  // 请将模型文件放在 public/models/ 目录下，并修改这里的文件名
+  const { scene } = useGLTF('/models/your-campus.glb');
 
   const [infoPoints, setInfoPoints] = useState([]);
 
+  // 模型加载后，遍历所有子物体，提取信息牌数据
   useEffect(() => {
     if (scene) {
       const points = [];
       scene.traverse((child) => {
+        // 判断是否是信息牌：物体名称以 'info_' 开头
         if (child.isObject3D && child.name.startsWith('info_')) {
           // 兼容多种属性读取方式
           const title = child.userData?.title || child.title || '未命名地点';
           points.push({
-            position: child.position.clone(),
+            position: child.position.clone(), // 获取世界坐标
             title: title,
           });
         }
@@ -154,19 +156,28 @@ function CampusModel() {
 
   return (
     <>
+      {/* 渲染模型本身 */}
       <primitive object={scene} />
+
+      {/* 在对应位置显示HTML信息牌（已放大） */}
       {infoPoints.map((point, index) => (
-        <Html key={index} position={point.position} center distanceFactor={10}>
+        <Html
+          key={index}
+          position={point.position}
+          center
+          distanceFactor={8}      // 数值越小，标签越明显
+          scale={1.5}             // 整体放大1.5倍
+        >
           <div style={{
             background: 'rgba(0,0,0,0.7)',
             color: 'white',
-            padding: '8px 15px',
-            borderRadius: '20px',
-            fontSize: '16px',
-            border: '2px solid gold',
+            padding: '12px 24px',
+            borderRadius: '30px',
+            fontSize: '24px',
+            border: '3px solid gold',
             pointerEvents: 'none',
             whiteSpace: 'nowrap',
-            transform: 'translateY(-20px)'
+            transform: 'translateY(-30px)' // 让标签悬浮在物体上方
           }}>
             {point.title}
           </div>
@@ -184,14 +195,17 @@ function App() {
         camera={{ position: [10, 5, 15], fov: 60 }}
         shadows
       >
+        {/* 环境光与方向光 */}
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
 
-        {/* 使用自定义第一人称控制，替代 OrbitControls */}
-        <FirstPersonControls speed={0.3} zoomSpeed={0.8} />
+        {/* 使用自定义第一人称控制 */}
+        <FirstPersonControls speed={0.3} zoomSpeed={6.0} />
 
+        {/* 加载校园模型和信息牌 */}
         <CampusModel />
 
+        {/* 可选：添加地面网格辅助 */}
         <gridHelper args={[100, 20]} />
       </Canvas>
     </div>

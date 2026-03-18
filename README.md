@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -68,3 +69,11 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+=======
+- 👋 Hi, I’m shanyun-weixing(闪云-微星) @cgy530627
+- 👀 I’m interested in Python
+- 🌱 I’m currently learning coding
+- 💞️ I’m looking to collaborate on interesting job in the field of IT
+- 📫 How to reach me ?(闪云-微星 on the CSDN)
+- 😄 Pronouns: an outgoing and enthusiastic boy
+>>>>>>> d038e94fa525a0f709517a98cc1ca1a2cc1a4bdf
